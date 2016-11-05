@@ -15,7 +15,8 @@ data Irregularity = Irregularity {
   , tightness    :: Bool
   , inflammation :: Bool
   , itching      :: Bool
-  , other        :: String
+  , discharge    :: Bool
+  , other        :: Maybe String
   , notes        :: Maybe String
 } deriving Generic
 
