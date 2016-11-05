@@ -55,6 +55,7 @@ data PInfo = PInfo {
   , legs      :: Maybe Irregularity
   , joints    :: Maybe Irregularity
   , genitals  :: Maybe Irregularity
+  , ears      :: Maybe Irregularity
 
   -- Other symptoms
   , coughing   :: Bool
