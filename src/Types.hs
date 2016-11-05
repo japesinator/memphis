@@ -21,6 +21,7 @@ data Irregularity = Irregularity {
 } deriving Generic
 
 instance FromJSON Irregularity
+instance ToJSON   Irregularity
 
 data PInfo = PInfo {
   -- Basic info
@@ -84,6 +85,7 @@ data PInfo = PInfo {
 } deriving Generic
 
 instance FromJSON PInfo
+instance ToJSON   PInfo
 
 data DInfo = DInfo {
     commonCold     :: Maybe String
@@ -122,8 +124,9 @@ data Diagnosis = Diagnosis {
   , doctorIf    :: [String]
 }
 
-type PatientAPI = "patient-entry"  :> Capture "patient" Int :> ReqBody '[JSON] PInfo :> Post '[JSON] Bool
-             :<|> "doctor-entry"   :> Capture "patient" Int :> ReqBody '[JSON] DInfo :> Post '[JSON] Bool
-             :<|> "doctor-results" :> Capture "patient" Int                          :> Get  '[JSON] (Maybe DInfo)
+type PatientAPI = "patient-entry"   :> Capture "patient" Int :> ReqBody '[JSON] PInfo :> Post '[JSON] Bool
+             :<|> "doctor-entry"    :> Capture "patient" Int :> ReqBody '[JSON] DInfo :> Post '[JSON] Bool
+             :<|> "patient-results" :> Capture "patient" Int                          :> Get  '[JSON] (Maybe PInfo)
+             :<|> "doctor-results"  :> Capture "patient" Int                          :> Get  '[JSON] (Maybe DInfo)
 
 type ST = H.Map Int (PInfo, Maybe DInfo)
