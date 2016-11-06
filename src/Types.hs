@@ -46,7 +46,7 @@ data PInfo = PInfo {
 
   -- Irregularities
   , head      :: Maybe Irregularity
-  , neck      :: Maybe Irregularity
+  , throat    :: Maybe Irregularity
   , upperBack :: Maybe Irregularity
   , lowerBack :: Maybe Irregularity
   , stomach   :: Maybe Irregularity
