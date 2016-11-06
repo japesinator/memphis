@@ -99,6 +99,9 @@ data PInfo = PInfo {
   , soreThroat :: Bool
   , bodyAche   :: Bool
   , lymphNodes :: Bool
+  , moodSwings :: Bool
+  , appetite   :: Bool
+  , weightGain :: Bool
 
   -- Because we miss things
   , qualityOfLife :: Int
@@ -110,7 +113,7 @@ instance Show PInfo where
               hospitalizedRecently surgery medication chronicIllness
               allergies asthma heartDisease firstPeriod lastPeriod
               head throat back stomach chest arms legs joints genitals ears
-              coughing sneezing nausea dizziness vision hearing vomiting breathing congestion urination defecation fever shaking chills heat exhaustion insomnia bloating runnyNose mucusColor soreThroat bodyAche lymphNodes qol notes) = f height "Height"
+              coughing sneezing nausea dizziness vision hearing vomiting breathing congestion urination defecation fever shaking chills heat exhaustion insomnia bloating runnyNose mucusColor soreThroat bodyAche lymphNodes moodSwings appetite weightGain qol notes) = f height "Height"
                                   ++ f weight "Weight"
                                   ++ f age "Age"
                                   ++ f gender "Gender"
@@ -153,6 +156,9 @@ instance Show PInfo where
                                   ++ i soreThroat "sore throat"
                                   ++ i bodyAche "body aching"
                                   ++ i lymphNodes "swollen lymph nodes"
+                                  ++ i moodSwings "mood swings"
+                                  ++ i appetite "change in appetite"
+                                  ++ i weightGain "weight gain"
                                   ++ "Patient rates their quality of life as " ++ show qol ++ "/5\n"
                                   ++ case notes of
                                     Nothing  -> ""
