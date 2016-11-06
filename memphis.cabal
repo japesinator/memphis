@@ -18,9 +18,11 @@ library
   exposed-modules:     Lib
                      , Types
                      , Form
+                     , Diagnosis
   build-depends:       base >= 4.7 && < 6
                      , aeson
                      , blaze-html
+                     , blaze-markup
                      , digestive-functors
                      , digestive-functors-blaze
                      , digestive-functors-happstack

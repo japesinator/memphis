@@ -4,8 +4,12 @@ module Form where
 
 import Types
 import Control.Applicative
-import qualified Happstack.Server as HS
+import Control.Monad
+import Control.Monad.IO.Class
+import Happstack.Server
+import Text.Blaze ((!))
 import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
 import Text.Digestive
 import Text.Digestive.Blaze.Html5
 import Text.Digestive.Happstack
@@ -103,15 +107,10 @@ dinfoForm = DInfo
   <*> "Diagnose chicken pox" .: bool Nothing
   <*> "Diagnose mono" .: bool Nothing
   <*> "Diagnose pneumonia" .: bool Nothing
-  <*> "Diagnose dehydration" .: bool Nothing
   <*> "Diagnose menopause" .: bool Nothing
   <*> "Diagnose a yeast infection" .: bool Nothing
-  <*> "Diagnose acid reflux" .: bool Nothing
-  <*> "Diagnose a sprained joint" .: bool Nothing
-  <*> "Diagnose a fractured bone" .: bool Nothing
-  <*> "Diagnose hypothermia" .: bool Nothing
-  <*> "Diagnose heatstroke" .: bool Nothing
-  <*> "Other notes" .: string Nothing
+  <*> "Diagnose heat exhaustion" .: bool Nothing
+  <*> "Other notes" .: check "" (/= "") (string Nothing)
 
 irregularityView :: View H.Html -> H.Html
 irregularityView v = do
@@ -335,83 +334,108 @@ dinfoView v = do
   inputCheckbox "Diagnose the common cold" v
   H.br
   label "Diagnose a sinus infection" v "Diagnose a sinus infection"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose a sinus infection" v
   H.br
   label "Diagnose an ear infection" v "Diagnose an ear infection"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose an ear infection" v
   H.br
   label "Diagnose pinkeye" v "Diagnose pinkeye"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose pinkeye" v
   H.br
   label "Diagnose strep throat" v "Diagnose strep throat"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose strep throat" v
   H.br
   label "Diagnose a UTI" v "Diagnose a UTI"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose a UTI" v
   H.br
   label "Diagnose pregnancy" v "Diagnose pregnancy"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose pregnancy" v
   H.br
   label "Diagnose herpes" v "Diagnose herpes"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose herpes" v
   H.br
   label "Diagnose the flu" v "Diagnose the flu"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose the flu" v
   H.br
   label "Diagnose shingles" v "Diagnose shingles"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose shingles" v
   H.br
   label "Diagnose chicken pox" v "Diagnose chicken pox"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose chicken pox" v
   H.br
   label "Diagnose mono" v "Diagnose mono"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose mono" v
   H.br
   label "Diagnose pneumonia" v "Diagnose pneumonia"
-  inputCheckbox "Diagnose the common cold" v
-  H.br
-  label "Diagnose dehydration" v "Diagnose dehydration"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose pneumonia" v
   H.br
   label "Diagnose menopause" v "Diagnose menopause"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose menopause" v
   H.br
   label "Diagnose a yeast infection" v "Diagnose a yeast infection"
-  inputCheckbox "Diagnose the common cold" v
+  inputCheckbox "Diagnose a yeast infection" v
   H.br
-  label "Diagnose acid reflux" v "Diagnose acid reflux"
-  inputCheckbox "Diagnose the common cold" v
-  H.br
-  label "Diagnose a sprained joint" v "Diagnose a sprained joint"
-  inputCheckbox "Diagnose the common cold" v
-  H.br
-  label "Diagnose a fractured bone" v "Diagnose a fractured bone"
-  inputCheckbox "Diagnose the common cold" v
-  H.br
-  label "Diagnose hypothermia" v "Diagnose hypothermia"
-  inputCheckbox "Diagnose the common cold" v
-  H.br
-  label "Diagnose heatstroke" v "Diagnose heatstroke"
-  inputCheckbox "Diagnose the common cold" v
+  label "Diagnose heat exhaustion" v "Diagnose heat exhaustion"
+  inputCheckbox "Diagnose heat exhaustion" v
   H.br
   label "Other notes" v "Other notes"
-  inputText "Diagnose the common cold" v
+  inputText "Other notes" v
   H.br
 
-site :: HS.ServerPart HS.Response
-site = do
-  HS.decodeBody $ HS.defaultBodyPolicy "/tmp" 4096 4096 4096
+patientInfo :: ServerPart Response
+patientInfo = do
+  decodeBody $ defaultBodyPolicy "/tmp" 4096 4096 4096
   r <- runForm "test" pinfoForm
   case r of
     (view, Nothing) -> do
       let view' = fmap H.toHtml view
-      HS.ok $ HS.toResponse $
-        form view' "/" $ do
-          pinfoView view'
-          H.br
-          inputSubmit "Submit"
+      ok $ toResponse $ form view' "/patient-info" ! A.action "/patient-info" $ do
+        pinfoView view'
+        H.br
+        inputSubmit "Submit"
     (_, Just release) -> do
-      error "fuk"
+      _ <- liftIO $ writeFile "patient" (show release)
+      ok $ toResponse $ H.h1 "Successfully recieved info"
+
+doctorInfo :: ServerPart Response
+doctorInfo = do
+  decodeBody $ defaultBodyPolicy "/tmp2" 4096 4096 4096
+  r <- runForm "test2" dinfoForm
+  case r of
+    (view, Nothing) -> do
+      p <- liftIO $ readFile "patient"
+      let view' = fmap H.toHtml view
+      ok $ toResponse $ form view' "/doctor-info" ! A.action "/doctor-info" $ do
+        mapM_ (H.p . H.toHtml) $ lines $ showP (read p :: PInfo)
+        H.br
+        dinfoView view'
+        H.br
+        inputSubmit "Submit"
+    (_, Just release) -> do
+      _ <- liftIO $ writeFile "doctor" (show release)
+      ok $ toResponse $ H.h1 "Successfully recieved info"
+
+patientResults :: ServerPart Response
+patientResults = do
+  decodeBody $ defaultBodyPolicy "/tmp2" 4096 4096 4096
+  d <- liftIO $ readFile "doctor"
+  return $ toResponse $ mapM_ (H.p . H.toHtml) $ lines $ showD1 (read d :: DInfo)
+
+doctorResults :: ServerPart Response
+doctorResults = do
+  decodeBody $ defaultBodyPolicy "/tmp2" 4096 4096 4096
+  d <- liftIO $ readFile "doctor"
+  p <- liftIO $ readFile "patient"
+  return $ toResponse $ do
+    mapM_ (H.p . H.toHtml) $ lines $ showP  (read p :: PInfo)
+    mapM_ (H.p . H.toHtml) $ lines $ showD2 (read d :: DInfo)
+
+site :: ServerPart Response
+site = msum [ dir "patient-info" patientInfo
+            , dir "doctor-info"  doctorInfo
+            , dir "patient-results" patientResults
+            , dir "doctor-results" doctorResults
+            ]
 
 putsite :: IO ()
-putsite = HS.simpleHTTP HS.nullConf site
+putsite = simpleHTTP nullConf site

@@ -1,5 +1,7 @@
 module Types where
 
+import qualified Diagnosis as D
+
 import Data.Aeson
 import qualified Data.HashMap as H
 import GHC.Generics
@@ -18,10 +20,9 @@ data Irregularity = Irregularity {
   , discharge     :: Bool
   , discoloration :: Bool
   , notes         :: String
-} deriving Generic
+} deriving (Generic, Show, Read)
 
-instance Show Irregularity where
-  show (Irregularity burning stinging sharpPain dullPain rash numbness tightness inflammation itching discharge discoloration notes) =
+showI (Irregularity burning stinging sharpPain dullPain rash numbness tightness inflammation itching discharge discoloration notes) =
        f burning "burning"
     ++ f stinging "stinging"
     ++ f sharpPain "sharp pain"
@@ -33,9 +34,9 @@ instance Show Irregularity where
     ++ f itching "itching"
     ++ f discharge "discharge"
     ++ f discoloration "discoloration"
-    ++ if notes == "" then "" else "  Also note: " ++ notes ++ "\n"
+    ++ if notes == "" then "" else "* Also note: " ++ notes ++ "\n"
       where
-        f b s = if b then "  Patient complains of " ++ s ++ "\n" else ""
+        f b s = if b then "* Patient complains of " ++ s ++ "\n" else ""
 
 instance FromJSON Irregularity
 instance ToJSON   Irregularity
@@ -107,10 +108,10 @@ data PInfo = PInfo {
   -- Because we miss things
   , qualityOfLife :: Int
   , notes         :: String
-} deriving Generic
+} deriving (Generic, Show, Read)
 
-instance Show PInfo where
-  show (PInfo height weight age gender trans 
+showP :: PInfo -> String
+showP (PInfo height weight age gender trans 
               hospitalizedRecently surgery medication chronicIllness
               allergies asthma heartDisease firstPeriod lastPeriod
               head throat back stomach chest arms legs joints genitals ears extremities skin
@@ -172,7 +173,7 @@ instance Show PInfo where
                                   ++ "\n" where
                                     f a s = s ++ ": " ++ show a ++ "\n"
                                     g s t = if s == "" then "" else t ++ ": " ++ s ++ "\n"
-                                    h i s = if show i == "" then "" else "In " ++ s ++ ":\n" ++ show i
+                                    h i s = if showI i == "" then "" else "In " ++ s ++ ":\n" ++ showI i
                                     i b s = if b then "Patient reports " ++ s ++ "\n" else ""
 
 instance FromJSON PInfo
@@ -192,28 +193,56 @@ data DInfo = DInfo {
   , chickenPox     :: Bool
   , mono           :: Bool
   , pneumonia      :: Bool
-  , dehydration    :: Bool
   , menopause      :: Bool
   , yeastInfection :: Bool
-  , acidReflux     :: Bool
-  , sprainedJoint  :: Bool
-  , fracturedBone  :: Bool
-  , hypothermia    :: Bool
-  , heatstroke     :: Bool
+  , heatExhaustion :: Bool
   , notes          :: String
-} deriving (Generic, Show)
+} deriving (Generic, Show, Read)
 
 instance FromJSON DInfo
 instance ToJSON   DInfo
 
-data Diagnosis = Diagnosis {
-    name        :: String
-  , description :: String
-  , facts       :: [String]
-  , symptoms    :: [String]
-  , treatment   :: [String]
-  , doctorIf    :: [String]
-}
+showD1 :: DInfo -> String
+showD1 (DInfo commonCold sinusInfection earInfection pinkeye strepThroat uti pregnancy herpes flu shingles chickenPox mono pneumonia menopause yeastInfection heatExhaustion notes) =
+    f commonCold D.commonCold
+ ++ f sinusInfection D.sinusInfection
+ ++ f earInfection   D.earInfection
+ ++ f pinkeye        D.pinkeye
+ ++ f strepThroat    D.strepThroat
+ ++ f uti            D.uti
+ ++ f pregnancy      D.pregnancy
+ ++ f herpes         D.herpes
+ ++ f flu            D.flu
+ ++ f shingles       D.shingles
+ ++ f chickenPox     D.chickenPox
+ ++ f mono           D.mono
+ ++ f pneumonia      D.pneumonia
+ ++ f menopause      D.menopause
+ ++ f yeastInfection D.yeastInfection
+ ++ f heatExhaustion D.heatExhaustion
+ ++ "The doctor also noted: " ++ notes ++ "\n" where
+   f b d = if b then D.showD d else ""
+
+showD2 :: DInfo -> String
+showD2 (DInfo commonCold sinusInfection earInfection pinkeye strepThroat uti pregnancy herpes flu shingles chickenPox mono pneumonia menopause yeastInfection heatExhaustion notes) =
+    f commonCold D.commonCold
+ ++ f sinusInfection D.sinusInfection
+ ++ f earInfection   D.earInfection
+ ++ f pinkeye        D.pinkeye
+ ++ f strepThroat    D.strepThroat
+ ++ f uti            D.uti
+ ++ f pregnancy      D.pregnancy
+ ++ f herpes         D.herpes
+ ++ f flu            D.flu
+ ++ f shingles       D.shingles
+ ++ f chickenPox     D.chickenPox
+ ++ f mono           D.mono
+ ++ f pneumonia      D.pneumonia
+ ++ f menopause      D.menopause
+ ++ f yeastInfection D.yeastInfection
+ ++ f heatExhaustion D.heatExhaustion
+ ++ "The doctor also noted: " ++ notes ++ "\n" where
+   f b d = if b then "The doctor suspected " ++ D.name d ++ "\n" else ""
 
 type PatientAPI = "patient-entry"   :> Capture "patient" Int :> ReqBody '[JSON] PInfo :> Post '[JSON] Bool
              :<|> "doctor-entry"    :> Capture "patient" Int :> ReqBody '[JSON] DInfo :> Post '[JSON] Bool
