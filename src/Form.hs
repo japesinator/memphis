@@ -390,12 +390,14 @@ patientInfo = do
     (view, Nothing) -> do
       let view' = fmap H.toHtml view
       ok $ toResponse $ form view' "/patient-info" ! A.action "/patient-info" $ do
+        css
         pinfoView view'
         H.br
         inputSubmit "Submit"
     (_, Just release) -> do
       _ <- liftIO $ writeFile "patient" (show release)
       ok $ toResponse $ do
+        css
         H.h1 "Successfully recieved info"
         H.p "To finish your conversation please call XXX-XXX-XXXX or join hangouts.google.com/XXXX to speak with a real doctor about what you just discussed"
 
@@ -408,6 +410,7 @@ doctorInfo = do
       p <- liftIO $ readFile "patient"
       let view' = fmap H.toHtml view
       ok $ toResponse $ form view' "/doctor-info" ! A.action "/doctor-info" $ do
+        css
         mapM_ (H.p . H.toHtml) $ lines $ showP (read p :: PInfo)
         H.br
         dinfoView view'
@@ -416,6 +419,7 @@ doctorInfo = do
     (_, Just release) -> do
       _ <- liftIO $ writeFile "doctor" (show release)
       ok $ toResponse $ do
+        css
         H.h1 "Successfully recieved info"
         H.p "Thank you for helping those in need!"
 
@@ -423,7 +427,9 @@ patientResults :: ServerPart Response
 patientResults = do
   decodeBody $ defaultBodyPolicy "/tmp2" 4096 4096 4096
   d <- liftIO $ readFile "doctor"
-  return $ toResponse $ mapM_ (H.p . H.toHtml) $ lines $ showD1 (read d :: DInfo)
+  return $ toResponse $ do
+    css
+    H.body $ H.div $ mapM_ (H.p . H.toHtml) $ lines $ showD1 (read d :: DInfo)
 
 doctorResults :: ServerPart Response
 doctorResults = do
@@ -431,15 +437,99 @@ doctorResults = do
   d <- liftIO $ readFile "doctor"
   p <- liftIO $ readFile "patient"
   return $ toResponse $ do
-    mapM_ (H.p . H.toHtml) $ lines $ showP  (read p :: PInfo)
-    mapM_ (H.p . H.toHtml) $ lines $ showD2 (read d :: DInfo)
+    css
+    H.body $ H.div $ do
+      mapM_ (H.p . H.toHtml) $ lines $ showP  (read p :: PInfo)
+      mapM_ (H.p . H.toHtml) $ lines $ showD2 (read d :: DInfo)
+
+landing :: ServerPart Response
+landing = do
+  decodeBody $ defaultBodyPolicy "/tmp2" 4096 4096 4096
+  return $ toResponse $ do
+    css
+    H.body $ H.div $ do
+      H.h1 "Project Memphis"
+      H.img ! A.src "http://i.imgur.com/X0w99wF.png"
+      H.br
+      H.br
+      H.a ! A.href "/patient-info" $ "Start a consultation"
+      H.br
+      H.a ! A.href "/doctor-info" $ "Help a patient"
+      H.br
+      H.a ! A.href "/patient-results" $ "View results (patient)"
+      H.br
+      H.a ! A.href "/doctor-results" $ "View results (doctor)"
+      H.br
+      H.br
+      H.a ! A.href "http://www.cvs.com/minuteclinic/clinic-locator" $ "Find clinics near me"
+      H.br
+      H.a ! A.href "https://www.healthcare.gov/" $ "Get health insurance"
+      H.br
 
 site :: ServerPart Response
 site = msum [ dir "patient-info" patientInfo
             , dir "doctor-info"  doctorInfo
             , dir "patient-results" patientResults
             , dir "doctor-results" doctorResults
+            , landing
             ]
+
+css :: H.Html
+css = H.style ! A.type_ "text/css" $ do
+  "form{"
+  "margin: auto;"
+  "    width: 50%;"
+  "    position: relative;"
+  "    background-color: #d3d3d3;"
+  "border-radius: 11px 11px 11px 11px;"
+  "    -moz-border-radius: 11px 11px 11px 11px;"
+  "    -webkit-border-radius: 11px 11px 11px 11px;"
+  "    border: 0px solid #71CCEB;"
+  "    padding: 10px;"
+  "    padding-bottom: 30px;"
+  "}"
+  "img{"
+  "max-width: 40%;"
+  "max-height: 40%;"
+  "}"
+  "div{"
+  "margin: auto;"
+  "    width: 50%;"
+  "    position: relative;"
+  "    background-color: #d3d3d3;"
+  "border-radius: 11px 11px 11px 11px;"
+  "    -moz-border-radius: 11px 11px 11px 11px;"
+  "    -webkit-border-radius: 11px 11px 11px 11px;"
+  "    border: 0px solid #71CCEB;"
+  "    padding: 10px;"
+  "    padding-bottom: 30px;"
+  "}"
+  "body{"
+  "font-family: Tahoma;"
+  "background-color: #71CCEB;"
+  "}"
+  "label{"
+  "    display: inline-block;"
+  "    float: left;"
+  "    clear: left;"
+  "    width: 50%;"
+  "    text-align: left;"
+  "    border: 20%"
+  "}"
+  "input {"
+  "  display: inline-block;"
+  "  float: right;"
+  "/*  border-radius: 10px 10px 10px 10px;"
+  "  -moz-border-radius: 10px 10px 59px 10px;"
+  "  -webkit-border-radius: 10px 10px 10px 10px;"
+  "  margin-top: 5px;"
+  "  margin-bottom: 5px;"
+  "*/"
+  "}"
+  "br{"
+  "display: block;"
+  "margin: 10px;"
+  "}"
 
 putsite :: IO ()
 putsite = simpleHTTP nullConf site
