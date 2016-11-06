@@ -64,16 +64,17 @@ data PInfo = PInfo {
   , lastPeriod   :: Maybe String
 
   -- Irregularities
-  , head      :: Maybe Irregularity
-  , throat    :: Maybe Irregularity
-  , back      :: Maybe Irregularity
-  , stomach   :: Maybe Irregularity
-  , chest     :: Maybe Irregularity
-  , arms      :: Maybe Irregularity
-  , legs      :: Maybe Irregularity
-  , joints    :: Maybe Irregularity
-  , genitals  :: Maybe Irregularity
-  , ears      :: Maybe Irregularity
+  , head        :: Maybe Irregularity
+  , throat      :: Maybe Irregularity
+  , back        :: Maybe Irregularity
+  , stomach     :: Maybe Irregularity
+  , chest       :: Maybe Irregularity
+  , arms        :: Maybe Irregularity
+  , legs        :: Maybe Irregularity
+  , joints      :: Maybe Irregularity
+  , genitals    :: Maybe Irregularity
+  , ears        :: Maybe Irregularity
+  , extremities :: Maybe Irregularity
 
   -- Other symptoms
   , coughing   :: Bool
@@ -113,7 +114,7 @@ instance Show PInfo where
   show (PInfo height weight age gender trans 
               hospitalizedRecently surgery medication chronicIllness
               allergies asthma heartDisease firstPeriod lastPeriod
-              head throat back stomach chest arms legs joints genitals ears
+              head throat back stomach chest arms legs joints genitals ears extremities
               coughing sneezing nausea dizziness vision hearing vomiting breathing congestion urination defecation fever shaking chills heat exhaustion insomnia bloating runnyNose mucusColor soreThroat bodyAche lymphNodes moodSwings appetite weightGain sweating qol notes) = f height "Height"
                                   ++ f weight "Weight"
                                   ++ f age "Age"
@@ -133,6 +134,7 @@ instance Show PInfo where
                                   ++ h joints "joints"
                                   ++ h genitals "genitals"
                                   ++ h ears "ears"
+                                  ++ h extremities "extremities"
                                   ++ i coughing "coughing"
                                   ++ i sneezing "sneezing"
                                   ++ i nausea "nausea"
@@ -195,6 +197,8 @@ data DInfo = DInfo {
   , acidReflux     :: Bool
   , sprainedJoint  :: Bool
   , fracturedBone  :: Bool
+  , hypothermia    :: Bool
+  , heatstroke     :: Bool
   , notes          :: String
 } deriving Generic
 
