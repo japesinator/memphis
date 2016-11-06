@@ -6,18 +6,19 @@ import GHC.Generics
 import Servant
 
 data Irregularity = Irregularity {
-    burning      :: Bool
-  , stinging     :: Bool
-  , sharpPain    :: Bool
-  , dullPain     :: Bool
-  , rash         :: Bool
-  , numbness     :: Bool
-  , tightness    :: Bool
-  , inflammation :: Bool
-  , itching      :: Bool
-  , discharge    :: Bool
-  , other        :: Maybe String
-  , notes        :: Maybe String
+    burning       :: Bool
+  , stinging      :: Bool
+  , sharpPain     :: Bool
+  , dullPain      :: Bool
+  , rash          :: Bool
+  , numbness      :: Bool
+  , tightness     :: Bool
+  , inflammation  :: Bool
+  , itching       :: Bool
+  , discharge     :: Bool
+  , discoloration :: Bool
+  , other         :: Maybe String
+  , notes         :: Maybe String
 } deriving Generic
 
 instance FromJSON Irregularity
