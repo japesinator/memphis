@@ -17,7 +17,7 @@ data Irregularity = Irregularity {
   , itching       :: Bool
   , discharge     :: Bool
   , discoloration :: Bool
-  , notes         :: Maybe String
+  , notes         :: String
 } deriving Generic
 
 instance Show Irregularity where
@@ -33,9 +33,7 @@ instance Show Irregularity where
     ++ f itching "itching"
     ++ f discharge "discharge"
     ++ f discoloration "discoloration"
-    ++ case notes of
-            Nothing  -> ""
-            (Just a) -> "  Also note: " ++ a ++ "\n"
+    ++ if notes == "" then "" else "  Also note: " ++ notes ++ "\n"
       where
         f b s = if b then "  Patient complains of " ++ s ++ "\n" else ""
 
@@ -51,30 +49,31 @@ data PInfo = PInfo {
   , trans  :: Bool
 
   -- R u ded
-  , hospitalizedRecently :: Maybe String
-  , surgery              :: Maybe String
-  , medication           :: Maybe String
-  , chronicIllness       :: Maybe String
+  , hospitalizedRecently :: String
+  , surgery              :: String
+  , medication           :: String
+  , chronicIllness       :: String
 
   -- Obvious health stuff
-  , allergies    :: Maybe String
-  , asthma       :: Maybe String
-  , heartDisease :: Maybe String
-  , firstPeriod  :: Maybe Int
-  , lastPeriod   :: Maybe String
+  , allergies    :: String
+  , asthma       :: String
+  , heartDisease :: String
+  , firstPeriod  :: String
+  , lastPeriod   :: String
 
   -- Irregularities
-  , head        :: Maybe Irregularity
-  , throat      :: Maybe Irregularity
-  , back        :: Maybe Irregularity
-  , stomach     :: Maybe Irregularity
-  , chest       :: Maybe Irregularity
-  , arms        :: Maybe Irregularity
-  , legs        :: Maybe Irregularity
-  , joints      :: Maybe Irregularity
-  , genitals    :: Maybe Irregularity
-  , ears        :: Maybe Irregularity
-  , extremities :: Maybe Irregularity
+  , head        :: Irregularity
+  , throat      :: Irregularity
+  , back        :: Irregularity
+  , stomach     :: Irregularity
+  , chest       :: Irregularity
+  , arms        :: Irregularity
+  , legs        :: Irregularity
+  , joints      :: Irregularity
+  , genitals    :: Irregularity
+  , ears        :: Irregularity
+  , extremities :: Irregularity
+  , skin        :: Irregularity
 
   -- Other symptoms
   , coughing   :: Bool
@@ -103,27 +102,32 @@ data PInfo = PInfo {
   , moodSwings :: Bool
   , appetite   :: Bool
   , weightGain :: Bool
-  , sweating :: Bool
+  , sweating   :: Bool
 
   -- Because we miss things
   , qualityOfLife :: Int
-  , notes         :: Maybe String
+  , notes         :: String
 } deriving Generic
 
 instance Show PInfo where
   show (PInfo height weight age gender trans 
               hospitalizedRecently surgery medication chronicIllness
               allergies asthma heartDisease firstPeriod lastPeriod
-              head throat back stomach chest arms legs joints genitals ears extremities
+              head throat back stomach chest arms legs joints genitals ears extremities skin
               coughing sneezing nausea dizziness vision hearing vomiting breathing congestion urination defecation fever shaking chills heat exhaustion insomnia bloating runnyNose mucusColor soreThroat bodyAche lymphNodes moodSwings appetite weightGain sweating qol notes) = f height "Height"
                                   ++ f weight "Weight"
                                   ++ f age "Age"
-                                  ++ f gender "Gender"
+                                  ++ "Gender: " ++ gender ++ "\n"
                                   ++ if trans then "Patient is transgender\n" else ""
                                   ++ g hospitalizedRecently "Patient was hospitalized recently"
                                   ++ g surgery "Patient had recent surgery"
                                   ++ g medication "Patient takes medication"
                                   ++ g chronicIllness "Patient has history of chronic illness"
+                                  ++ g allergies "Patient has allergies"
+                                  ++ g asthma "Patient has asthma"
+                                  ++ g heartDisease "Patient has heart disease"
+                                  ++ g firstPeriod "Patient had first period"
+                                  ++ g lastPeriod "Patient had last period"
                                   ++ h head "head"
                                   ++ h throat "throat"
                                   ++ h back "back"
@@ -135,6 +139,7 @@ instance Show PInfo where
                                   ++ h genitals "genitals"
                                   ++ h ears "ears"
                                   ++ h extremities "extremities"
+                                  ++ h skin "skin"
                                   ++ i coughing "coughing"
                                   ++ i sneezing "sneezing"
                                   ++ i nausea "nausea"
@@ -163,15 +168,11 @@ instance Show PInfo where
                                   ++ i weightGain "weight gain"
                                   ++ i sweating "excessive sweating"
                                   ++ "Patient rates their quality of life as " ++ show qol ++ "/5\n"
-                                  ++ case notes of
-                                    Nothing  -> ""
-                                    (Just a) -> "  Also note: " ++ a
+                                  ++ if notes == "" then "" else "Also note: " ++ notes
                                   ++ "\n" where
                                     f a s = s ++ ": " ++ show a ++ "\n"
-                                    g Nothing _ = ""
-                                    g (Just s) t = t ++ ": " ++ s ++ "\n"
-                                    h Nothing _ = ""
-                                    h (Just i) s = "In " ++ s ++ ":\n" ++ show i
+                                    g s t = if s == "" then "" else t ++ ": " ++ s ++ "\n"
+                                    h i s = if show i == "" then "" else "In " ++ s ++ ":\n" ++ show i
                                     i b s = if b then "Patient reports " ++ s ++ "\n" else ""
 
 instance FromJSON PInfo
@@ -200,7 +201,7 @@ data DInfo = DInfo {
   , hypothermia    :: Bool
   , heatstroke     :: Bool
   , notes          :: String
-} deriving Generic
+} deriving (Generic, Show)
 
 instance FromJSON DInfo
 instance ToJSON   DInfo

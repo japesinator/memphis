@@ -17,9 +17,15 @@ library
   hs-source-dirs:      src
   exposed-modules:     Lib
                      , Types
+                     , Form
   build-depends:       base >= 4.7 && < 6
                      , aeson
+                     , blaze-html
+                     , digestive-functors
+                     , digestive-functors-blaze
+                     , digestive-functors-happstack
                      , hashmap
+                     , happstack-server
                      , mtl
                      , servant
                      , servant-server
