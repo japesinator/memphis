@@ -17,9 +17,27 @@ data Irregularity = Irregularity {
   , itching       :: Bool
   , discharge     :: Bool
   , discoloration :: Bool
-  , other         :: Maybe String
   , notes         :: Maybe String
 } deriving Generic
+
+instance Show Irregularity where
+  show (Irregularity burning stinging sharpPain dullPain rash numbness tightness inflammation itching discharge discoloration notes) =
+       f burning "burning"
+    ++ f stinging "stinging"
+    ++ f sharpPain "sharp pain"
+    ++ f dullPain "dull pain"
+    ++ f rash "rash"
+    ++ f numbness "numbness"
+    ++ f tightness "tightness"
+    ++ f inflammation "inflammation"
+    ++ f itching "itching"
+    ++ f discharge "discharge"
+    ++ f discoloration "discoloration"
+    ++ case notes of
+            Nothing  -> ""
+            (Just a) -> "  Also note: " ++ a ++ "\n"
+      where
+        f b s = if b then "  Patient complains of " ++ s ++ "\n" else ""
 
 instance FromJSON Irregularity
 instance ToJSON   Irregularity
@@ -48,8 +66,7 @@ data PInfo = PInfo {
   -- Irregularities
   , head      :: Maybe Irregularity
   , throat    :: Maybe Irregularity
-  , upperBack :: Maybe Irregularity
-  , lowerBack :: Maybe Irregularity
+  , back      :: Maybe Irregularity
   , stomach   :: Maybe Irregularity
   , chest     :: Maybe Irregularity
   , arms      :: Maybe Irregularity
@@ -77,15 +94,76 @@ data PInfo = PInfo {
   , exhaustion :: Bool
   , insomnia   :: Bool
   , bloating   :: Bool
-  , breathing  :: Bool
   , runnyNose  :: Bool
   , mucusColor :: Bool
   , soreThroat :: Bool
+  , bodyAche   :: Bool
+  , lymphNodes :: Bool
 
   -- Because we miss things
   , qualityOfLife :: Int
   , notes         :: Maybe String
 } deriving Generic
+
+instance Show PInfo where
+  show (PInfo height weight age gender trans 
+              hospitalizedRecently surgery medication chronicIllness
+              allergies asthma heartDisease firstPeriod lastPeriod
+              head throat back stomach chest arms legs joints genitals ears
+              coughing sneezing nausea dizziness vision hearing vomiting breathing congestion urination defecation fever shaking chills heat exhaustion insomnia bloating runnyNose mucusColor soreThroat bodyAche lymphNodes qol notes) = f height "Height"
+                                  ++ f weight "Weight"
+                                  ++ f age "Age"
+                                  ++ f gender "Gender"
+                                  ++ if trans then "Patient is transgender\n" else ""
+                                  ++ g hospitalizedRecently "Patient was hospitalized recently"
+                                  ++ g surgery "Patient had recent surgery"
+                                  ++ g medication "Patient takes medication"
+                                  ++ g chronicIllness "Patient has history of chronic illness"
+                                  ++ h head "head"
+                                  ++ h throat "throat"
+                                  ++ h back "back"
+                                  ++ h stomach "stomach"
+                                  ++ h chest "chest"
+                                  ++ h arms "arms"
+                                  ++ h legs "legs"
+                                  ++ h joints "joints"
+                                  ++ h genitals "genitals"
+                                  ++ h ears "ears"
+                                  ++ i coughing "coughing"
+                                  ++ i sneezing "sneezing"
+                                  ++ i nausea "nausea"
+                                  ++ i dizziness "dizziness"
+                                  ++ i vision "vision issues"
+                                  ++ i hearing "hearing issues"
+                                  ++ i vomiting "vomiting"
+                                  ++ i breathing "breathing issues"
+                                  ++ i congestion "congestion"
+                                  ++ i urination "urination issues"
+                                  ++ i defecation "defecation issues"
+                                  ++ i fever "fever"
+                                  ++ i shaking "shaking"
+                                  ++ i chills "chills"
+                                  ++ i heat "feeling of heat"
+                                  ++ i exhaustion "exhaustion"
+                                  ++ i insomnia "insomnia"
+                                  ++ i bloating "bloating"
+                                  ++ i breathing "breathing issues"
+                                  ++ i runnyNose "runny nose"
+                                  ++ i mucusColor "abnormal mucus color"
+                                  ++ i soreThroat "sore throat"
+                                  ++ i bodyAche "body aching"
+                                  ++ i lymphNodes "swollen lymph nodes"
+                                  ++ "Patient rates their quality of life as " ++ show qol ++ "/5\n"
+                                  ++ case notes of
+                                    Nothing  -> ""
+                                    (Just a) -> "  Also note: " ++ a
+                                  ++ "\n" where
+                                    f a s = s ++ ": " ++ show a ++ "\n"
+                                    g Nothing _ = ""
+                                    g (Just s) t = t ++ ": " ++ s ++ "\n"
+                                    h Nothing _ = ""
+                                    h (Just i) s = "In " ++ s ++ ":\n" ++ show i
+                                    i b s = if b then "Patient reports " ++ s ++ "\n" else ""
 
 instance FromJSON PInfo
 instance ToJSON   PInfo
@@ -127,7 +205,7 @@ data Diagnosis = Diagnosis {
 
 type PatientAPI = "patient-entry"   :> Capture "patient" Int :> ReqBody '[JSON] PInfo :> Post '[JSON] Bool
              :<|> "doctor-entry"    :> Capture "patient" Int :> ReqBody '[JSON] DInfo :> Post '[JSON] Bool
-             :<|> "patient-results" :> Capture "patient" Int                          :> Get  '[JSON] (Maybe PInfo)
+             :<|> "patient-results" :> Capture "patient" Int                          :> Get  '[JSON] (Maybe String)
              :<|> "doctor-results"  :> Capture "patient" Int                          :> Get  '[JSON] (Maybe DInfo)
 
 type ST = H.Map Int (PInfo, Maybe DInfo)
