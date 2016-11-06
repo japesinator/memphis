@@ -395,7 +395,9 @@ patientInfo = do
         inputSubmit "Submit"
     (_, Just release) -> do
       _ <- liftIO $ writeFile "patient" (show release)
-      ok $ toResponse $ H.h1 "Successfully recieved info"
+      ok $ toResponse $ do
+        H.h1 "Successfully recieved info"
+        H.p "To finish your conversation please call XXX-XXX-XXXX or join hangouts.google.com/XXXX to speak with a real doctor about what you just discussed"
 
 doctorInfo :: ServerPart Response
 doctorInfo = do
@@ -413,7 +415,9 @@ doctorInfo = do
         inputSubmit "Submit"
     (_, Just release) -> do
       _ <- liftIO $ writeFile "doctor" (show release)
-      ok $ toResponse $ H.h1 "Successfully recieved info"
+      ok $ toResponse $ do
+        H.h1 "Successfully recieved info"
+        H.p "Thank you for helping those in need!"
 
 patientResults :: ServerPart Response
 patientResults = do
