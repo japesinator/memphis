@@ -79,6 +79,7 @@ data PInfo = PInfo {
   , bloating   :: Bool
   , breathing  :: Bool
   , runnyNose  :: Bool
+  , mucusColor :: Bool
   , soreThroat :: Bool
 
   -- Because we miss things
@@ -90,27 +91,25 @@ instance FromJSON PInfo
 instance ToJSON   PInfo
 
 data DInfo = DInfo {
-    commonCold     :: Maybe String
-  , sinusInfection :: Maybe String
-  , earInfection   :: Maybe String
-  , pinkeye        :: Maybe String
-  , strepThroat    :: Maybe String
-  , uti            :: Maybe String
-  , pregnancy      :: Maybe String
-  , herpes         :: Maybe String
-  , flu            :: Maybe String
-  , shingles       :: Maybe String
-  , chickenPox     :: Maybe String
-  , mono           :: Maybe String
-  , pneumonia      :: Maybe String
-  , dehydration    :: Maybe String
-  , menopause      :: Maybe String
-  , yeastInfection :: Maybe String
-  , acidReflux     :: Maybe String
-  , sprainedJoint  :: Maybe String
-  , fracturedBone  :: Maybe String
-  , mucusColor     :: Maybe String
-  , soreThroat     :: Maybe String
+    commonCold     :: Bool
+  , sinusInfection :: Bool
+  , earInfection   :: Bool
+  , pinkeye        :: Bool
+  , strepThroat    :: Bool
+  , uti            :: Bool
+  , pregnancy      :: Bool
+  , herpes         :: Bool
+  , flu            :: Bool
+  , shingles       :: Bool
+  , chickenPox     :: Bool
+  , mono           :: Bool
+  , pneumonia      :: Bool
+  , dehydration    :: Bool
+  , menopause      :: Bool
+  , yeastInfection :: Bool
+  , acidReflux     :: Bool
+  , sprainedJoint  :: Bool
+  , fracturedBone  :: Bool
   , notes          :: String
 } deriving Generic
 
